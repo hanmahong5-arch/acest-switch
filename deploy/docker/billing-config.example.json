@@ -1,0 +1,59 @@
+{
+  "casdoor": {
+    "endpoint": "http://localhost:8000",
+    "client_id": "your-client-id",
+    "client_secret": "your-client-secret",
+    "organization": "codeswitch",
+    "application": "codeswitch-app",
+    "certificate": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"
+  },
+  "lago": {
+    "api_url": "http://localhost:3001",
+    "api_key": "your-lago-api-key"
+  },
+  "payment": {
+    "environment": "sandbox",
+    "alipay": {
+      "app_id": "your-alipay-app-id",
+      "private_key": "-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----",
+      "public_key": "-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----",
+      "notify_url": "https://your-domain.com/api/v1/payment/alipay/notify",
+      "return_url": "https://your-domain.com/payment/success"
+    },
+    "wechat_pay": {
+      "mch_id": "your-merchant-id",
+      "app_id": "your-wechat-app-id",
+      "api_key_v3": "your-api-key-v3",
+      "serial_no": "your-certificate-serial-no",
+      "private_key_path": "/path/to/wechat/private_key.pem",
+      "notify_url": "https://your-domain.com/api/v1/payment/wechat/notify"
+    }
+  },
+  "auth": {
+    "skip_paths": [
+      "/health",
+      "/api/v1/auth/login",
+      "/api/v1/auth/callback",
+      "/api/v1/auth/refresh"
+    ],
+    "token_header": "Authorization",
+    "token_prefix": "Bearer ",
+    "cache_enabled": true,
+    "cache_ttl": "5m"
+  },
+  "billing": {
+    "enabled": true,
+    "min_balance": 100,
+    "report_async": true,
+    "skip_paths": [
+      "/health",
+      "/api/v1/auth/*",
+      "/api/v1/billing/*"
+    ],
+    "free_models": [
+      "gpt-3.5-turbo"
+    ],
+    "input_token_price": 0.001,
+    "output_token_price": 0.003
+  }
+}

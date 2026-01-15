@@ -1,0 +1,62 @@
+# Sync Service 配置
+
+server:
+  port: 8081
+  mode: debug  # debug, release
+
+nats:
+  url: nats://localhost:4222
+  reconnect_wait: 2s
+  max_reconnects: -1  # 无限重连
+  reconnect_buffer_size: 8388608  # 8MB
+
+redis:
+  addr: localhost:6379
+  password: ""
+  db: 0
+  pool_size: 10
+
+# NEW-API 对接配置
+newapi:
+  url: http://localhost:3000
+  admin_token: ""  # 管理员 Token
+
+jwt:
+  secret: "your-jwt-secret-key-at-least-32-chars"
+  issuer: "codeswitch"
+  access_token_ttl: 24h
+  refresh_token_ttl: 168h  # 7 days
+
+presence:
+  heartbeat_interval: 30s
+  timeout: 90s
+
+sync:
+  max_devices_per_user: 5
+  message_batch_size: 100
+  recovery_timeout: 30s
+
+# Billing 配置 (可选，也可通过 API 配置)
+# billing:
+#   enabled: false
+#   # Casdoor 认证
+#   casdoor_endpoint: ""
+#   casdoor_client_id: ""
+#   casdoor_client_secret: ""
+#   casdoor_organization: ""
+#   casdoor_application: ""
+#   # Lago 计费
+#   lago_api_url: ""
+#   lago_api_key: ""
+#   # 支付宝
+#   alipay_app_id: ""
+#   alipay_sandbox: true
+#   # 微信支付
+#   wechat_app_id: ""
+#   wechat_mch_id: ""
+#   # 回调 URL
+#   payment_notify_url: ""
+#   payment_return_url: ""
+#   # 订阅设置
+#   grace_period_hours: 24
+#   require_subscription: true

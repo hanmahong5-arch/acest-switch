@@ -1,0 +1,15 @@
+{
+	"fixed": {
+		"file_version": "0.1.8"
+	},
+	"info": {
+		"0000": {
+			"ProductVersion": "0.1.8",
+			"CompanyName": "Ailurus",
+			"FileDescription": "AI Provider Gateway for TUI and GUI Applications - Manage providers, relays, and request logs.",
+			"LegalCopyright": "(c) 2025, Ailurus",
+			"ProductName": "Ailurus PaaS",
+			"Comments": "Ailurus PaaS - AI Provider Gateway Platform"
+		}
+	}
+}

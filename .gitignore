@@ -1,0 +1,64 @@
+# Frontend
+frontend/node_modules
+frontend/bindings
+frontend/dist
+
+# Build artifacts
+.DS_Store
+.task
+bin
+.gocache/
+*.syso
+*.exe
+nul
+
+# Sensitive files
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.p12
+*.pfx
+*_rsa
+*_rsa.pub
+
+# Database files
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+.#*
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Test data
+test-*/
+testdata/fixtures/
+
+# Credentials
+*secret*
+*password*
+*credentials*
+config/local.yaml

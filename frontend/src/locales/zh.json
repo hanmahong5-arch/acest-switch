@@ -1,0 +1,1108 @@
+{
+  "common": {
+    "retry": "重试",
+    "refresh": "刷新",
+    "technicalDetails": "技术详情",
+    "search": "搜索",
+    "reset": "重置",
+    "save": "保存",
+    "cancel": "取消",
+    "confirm": "确认",
+    "actions": "操作",
+    "yes": "是",
+    "no": "否",
+    "close": "关闭"
+  },
+  "app": {
+    "title": "我的应用",
+    "login": "登录"
+  },
+  "menus": {
+    "general": "通用设置",
+    "shortcut": "快捷键",
+    "about": "关于"
+  },
+  "components": {
+    "home": {},
+    "provider": {
+      "modelWhitelist": {
+        "label": "模型白名单",
+        "tooltip": "声明该供应商支持的模型。支持精确匹配（claude-sonnet-4）和通配符（claude-*）",
+        "placeholder": "输入模型名称，如 claude-*",
+        "add": "添加",
+        "remove": "删除模型",
+        "examples": {
+          "title": "示例：",
+          "exact": "精确匹配",
+          "prefix": "前缀匹配所有 Claude 模型",
+          "vendor": "匹配带供应商前缀的模型"
+        }
+      },
+      "modelMapping": {
+        "label": "模型映射",
+        "tooltip": "将外部模型名称映射到供应商内部模型名称。支持通配符展开",
+        "keyPlaceholder": "外部模型名（如 claude-*）",
+        "valuePlaceholder": "内部模型名（如 anthropic/claude-*）",
+        "add": "添加",
+        "remove": "删除映射",
+        "examples": {
+          "title": "示例：",
+          "exact": "精确映射",
+          "wildcard": "通配符映射，自动展开 claude-sonnet-4 → anthropic/claude-sonnet-4",
+          "prefix": "前缀映射"
+        }
+      }
+    },
+    "main": {
+      "hero": {
+        "eyebrow": "Ailurus PaaS - AI 供应商网关",
+        "title": "面向 TUI 和 GUI 应用的企业级 AI 网关",
+        "lead": "统一网关平台，集中管理 AI 供应商、监控用量、保障服务可靠性，为您的应用提供稳定的 AI 能力支撑。"
+      },
+      "heatmap": {
+        "ariaLabel": "每日算力消耗热力图",
+        "legendLow": "低",
+        "legendHigh": "高",
+        "cellTitle": "{label}：{count} 次请求",
+        "loading": "加载热力图...",
+        "loadFailed": "热力图加载失败",
+        "noData": "暂无请求数据",
+        "noDataHint": "开始使用后将显示请求热力分布",
+        "metrics": {
+          "requests": "请求次数",
+          "inputTokens": "输入 Token",
+          "outputTokens": "输出 Token",
+          "reasoningTokens": "推理 Token",
+          "cost": "金额"
+        }
+      },
+      "tabs": {
+        "ariaLabel": "AI 供应商切换",
+        "addCard": "新增供应商卡片"
+      },
+      "relayToggle": {
+        "label": "Claude proxy",
+        "hostClaude": "托管 Claude Code",
+        "hostCodex": "托管 Codex",
+        "hostGeminiCli": "托管 Gemini-CLI",
+        "tooltip": "通过本地转发托管 API 访问，统一管理密钥与配额。",
+        "statusOn": "已托管",
+        "statusOff": "未托管"
+      },
+      "roundRobin": {
+        "label": "轮询模式",
+        "on": "已启用",
+        "off": "按优先级"
+      },
+      "logs": {
+        "view": "查看日志",
+        "streamOn": "流式",
+        "streamOff": "非流"
+      },
+      "controls": {
+        "bodyLogOn": "上下行日志已开启（点击关闭）",
+        "bodyLogOff": "上下行日志已关闭（点击开启）",
+        "theme": "切换主题",
+        "settings": "打开设置",
+        "mcp": "打开 MCP 面板",
+        "skill": "打开 Skill 列表",
+        "sync": "打开同步中心",
+        "gateway": "NEW-API 网关配置",
+        "import": "导入 cc-switch 配置",
+        "copyProxy": "复制代理地址",
+        "refresh": "刷新统计",
+        "admin": "运维管理后台"
+      },
+      "search": {
+        "placeholder": "按名称、API 地址或官网搜索供应商...",
+        "clear": "清除搜索"
+      },
+      "tabs": {
+        "ariaLabel": "供应商类型",
+        "addCard": "添加供应商"
+      },
+      "status": {
+        "todayStats": "今日统计",
+        "requests": "次请求",
+        "noRequests": "今日暂无请求",
+        "copied": "代理地址已复制",
+        "copyFailed": "复制失败",
+        "refreshed": "统计已刷新",
+        "bodyLogOn": "上下行日志已开启",
+        "bodyLogOff": "上下行日志已关闭",
+        "bodyLogFailed": "切换上下行日志失败"
+      },
+      "versionLabel": "版本 {version}",
+      "importConfig": {
+        "tooltip": "导入 {providers} 个供应商 · {servers} 个 MCP 服务器",
+        "success": "已导入 {providers} 个供应商与 {servers} 个 MCP 服务器",
+        "empty": "cc-switch 中的供应商与 MCP 均已同步",
+        "error": "导入 cc-switch 配置失败"
+      },
+      "providers": {
+        "requests": "请求数",
+        "tokens": "Tokens",
+        "cost": "花费",
+        "successRate": "成功率",
+        "loading": "刷新中...",
+        "noData": "今日暂无数据"
+      },
+      "form": {
+        "createTitle": "新增供应商",
+        "editTitle": "编辑供应商",
+        "proxyTip": {
+          "title": "网关地址",
+          "text": "将 TUI/GUI 客户端的 API 地址设置为以下网关地址，即可通过 Ailurus PaaS 统一路由和监控请求"
+        },
+        "labels": {
+          "name": "供应商名称",
+          "apiUrl": "API 地址",
+          "apiKey": "API 密钥",
+          "officialSite": "官网地址",
+          "icon": "图标",
+          "enabled": "启用状态",
+          "level": "优先级分组",
+          "colors": "主题色彩",
+          "tint": "色调（背景）",
+          "accent": "强调色"
+        },
+        "placeholders": {
+          "name": "例如：AICoding.sh",
+          "apiUrl": "https://api.aicoding.sh",
+          "apiKey": "sk-xxxxx",
+          "officialSite": "https://vendor.com",
+          "icon": "例如：aicoding、kimi",
+          "tint": "#f0f0f0",
+          "accent": "#0a84ff"
+        },
+        "hints": {
+          "name": "自定义名称，用于在界面中识别此供应商",
+          "apiUrl": "供应商的 API 端点地址，通常以 /v1 结尾",
+          "apiKey": "供应商提供的 API 密钥，用于认证请求",
+          "level": "数字越小优先级越高，Level 1 会被优先尝试，失败后依次尝试 Level 2、Level 3 等",
+          "colors": "自定义此供应商卡片的背景色和强调色"
+        },
+        "actions": {
+          "cancel": "取消",
+          "save": "保存",
+          "delete": "删除"
+        },
+        "switch": {
+          "on": "已启用",
+          "off": "未启用"
+        },
+        "confirmDeleteTitle": "删除供应商",
+        "confirmDeleteMessage": "确认删除 {name} 吗？操作不可撤销",
+        "errors": {
+          "invalidUrl": "请输入合法的 API 地址"
+        }
+      },
+      "levelDesc": {
+        "highest": "最高优先级",
+        "high": "高优先级",
+        "mediumHigh": "中高优先级",
+        "medium": "中等优先级",
+        "normal": "普通优先级",
+        "mediumLow": "中低优先级",
+        "low": "低优先级",
+        "lower": "较低优先级",
+        "veryLow": "很低优先级",
+        "lowest": "最低优先级"
+      },
+      "analytics": {
+        "title": "运营分析",
+        "refresh": "刷新",
+        "refreshing": "刷新中",
+        "loading": "加载中...",
+        "noData": "暂无数据",
+        "costBreakdown": {
+          "title": "成本构成",
+          "input": "输入",
+          "output": "输出",
+          "cacheCreate": "缓存创建",
+          "cacheRead": "缓存读取"
+        },
+        "cacheSavings": {
+          "title": "缓存节省",
+          "saved": "已节省",
+          "rate": "节省率",
+          "tokens": "缓存 Tokens"
+        },
+        "costTrend": {
+          "title": "成本趋势",
+          "dailyAvg": "日均成本",
+          "change": "变化",
+          "up": "上涨",
+          "down": "下降",
+          "stable": "稳定"
+        },
+        "responseTime": {
+          "title": "响应时间",
+          "avg": "平均"
+        },
+        "errorDistribution": {
+          "title": "错误分布",
+          "total": "总错误",
+          "rate": "错误率",
+          "noErrors": "暂无错误"
+        },
+        "providerReliability": {
+          "title": "供应商可靠性",
+          "requests": "请求",
+          "successRate": "成功率"
+        }
+      }
+    },
+    "logs": {
+      "eyebrow": "请求追踪",
+      "title": "代理请求日志",
+      "subtitle": "查看 Claude Code 与 Codex 代理的最新访问记录。",
+      "loading": "加载中...",
+      "refresh": "刷新",
+      "applyFilters": "应用筛选",
+      "empty": "暂无日志记录",
+      "lastUpdated": "最近更新：{time}",
+      "filters": {
+        "platform": "平台",
+        "allPlatforms": "全部平台",
+        "provider": "供应商",
+        "allProviders": "全部供应商",
+        "providerPlaceholder": "输入供应商名称",
+        "limit": "条数上限",
+        "search": "搜索",
+        "searchPlaceholder": "按 Trace ID、Request ID、错误信息搜索..."
+      },
+      "tabs": {
+        "all": "全部日志",
+        "errors": "仅错误"
+      },
+      "summary": {
+        "total": "请求量",
+        "requests": "累计请求次数",
+        "errors": "失败次数",
+        "errorHint": "数量与失败率",
+        "tokens": "Token 流量",
+        "tokenHint": "输入 + 输出 Tokens",
+        "cache": "缓存命中",
+        "cacheHint": "响应中的读取命中数",
+        "costHint": "近 24 小时总花费",
+        "todayScope": "今日 · {date}"
+      },
+      "table": {
+        "time": "时间",
+        "traceId": "追踪 ID",
+        "platform": "平台",
+        "provider": "供应商",
+        "model": "模型",
+        "httpCode": "HTTP",
+        "errorType": "错误类型",
+        "stream": "传输",
+        "duration": "耗时",
+        "tokens": "Token 汇总",
+        "actions": "操作"
+      },
+      "tokenLabels": {
+        "input": "输入",
+        "output": "输出",
+        "reasoning": "推理",
+        "cacheWrite": "缓存写入",
+        "cacheRead": "缓存读取",
+        "cost": "金额"
+      },
+      "streamOn": "流式",
+      "streamOff": "非流",
+      "back": "返回主页",
+      "nextRefresh": "距离下次刷新 {seconds}s",
+      "query": "查询",
+      "viewDetails": "详情",
+      "closeDetails": "关闭",
+      "copyTraceId": "复制追踪 ID",
+      "traceIdCopied": "追踪 ID 已复制！",
+      "errorTypes": {
+        "network_error": "网络错误",
+        "auth_error": "认证失败",
+        "rate_limit": "限流",
+        "client_error": "客户端错误",
+        "server_error": "服务端错误",
+        "unknown_error": "未知错误"
+      },
+      "detailsModal": {
+        "title": "请求详情",
+        "basic": "基本信息",
+        "request": "请求信息",
+        "response": "响应信息",
+        "error": "错误详情",
+        "timing": "耗时",
+        "tokens": "Token 用量",
+        "body": "请求/响应",
+        "requestBody": "请求体",
+        "responseBody": "响应体",
+        "bodyNotRecorded": "未记录（日志开关关闭或数据已过期）",
+        "bodySize": "数据大小",
+        "expiresAt": "过期时间"
+      }
+    },
+    "general": {
+      "title": {
+        "power": "权限设置",
+        "application": "应用设置",
+        "exterior": "外观设置",
+        "update": "应用更新",
+        "sharing": "配置分享"
+      },
+      "label": {
+        "assistant_access": "辅助功能访问权限",
+        "disk_access": "完全磁盘访问权限",
+        "startup": "登录时启动",
+        "language": "界面语言",
+        "theme": "主题模式",
+        "heatmap": "显示主界面热力墙",
+        "homeTitle": "显示首页标题",
+        "autoStart": "开机自启动",
+        "automatic_up": "自动检查更新",
+        "next_up": "下次启动自动检查更新"
+      },
+      "subLabel": {
+        "sb_assistant_access": "需要无障碍访问权限来操作剪切板内容",
+        "sb_disk_access": "需要完全磁盘访问权限来实现文件预览"
+      },
+      "buttons": {
+        "authorized": "已授权",
+        "go_authorized": "去授权",
+        "back": "返回首页"
+      },
+      "import": {
+        "label": "导入 cc-switch 配置",
+        "path": "配置文件：{path}",
+        "detail": "可导入 {providers} 个服务商 · {servers} 个 MCP 服务",
+        "synced": "当前服务商与 MCP 服务已同步",
+        "cta": "立即导入",
+        "syncedButton": "已同步",
+        "importing": "正在导入...",
+        "upload": "上传 JSON",
+        "uploadTitle": "选择自定义 cc-switch JSON 文件",
+        "confirm": "确认导入",
+        "noFile": "尚未选择配置文件",
+        "loadError": "读取配置文件失败",
+        "clear": "清除选择",
+        "reupload": "重新上传",
+        "missingDefault": "未检测到 cc-switch 配置文件，可手动上传 JSON 进行导入",
+        "deepLinkTitle": "从 Deep Link 导入",
+        "deepLinkDescription": "粘贴其他用户分享的 codeswitch:// 链接以导入他们的配置。",
+        "deepLinkPlaceholder": "codeswitch://import?config=...",
+        "importButton": "导入",
+        "deepLinkError": "导入配置失败，请检查链接格式是否正确"
+      },
+      "export": {
+        "title": "导出配置",
+        "description": "生成包含您配置的分享链接。出于安全考虑，API 密钥将被自动过滤。",
+        "includeLabel": "包含内容：",
+        "includeProviders": "Provider 配置",
+        "includeMCP": "MCP 服务器配置",
+        "filterAPIKeys": "过滤 API 密钥（推荐）",
+        "platformsLabel": "选择平台：",
+        "platform": {
+          "claude": "Claude Code",
+          "codex": "Codex",
+          "gemini-cli": "Gemini CLI"
+        },
+        "generate": "生成分享链接",
+        "generating": "生成中...",
+        "generated": "分享链接已生成！",
+        "error": "生成分享链接失败",
+        "copy": "复制",
+        "copied": "链接已复制到剪贴板！",
+        "copyError": "复制到剪贴板失败",
+        "hint": "将此链接分享给其他人，帮助他们快速设置相同的配置。API 密钥已自动过滤以确保安全。"
+      }
+    },
+    "mcp": {
+      "hero": {
+        "eyebrow": "MCP 管理",
+        "title": "管理 MCP 服务器",
+        "lead": "集中维护本地 / 远程 MCP Servers，了解各平台的启用状态并快速编辑配置。"
+      },
+      "controls": {
+        "back": "返回主页",
+        "settings": "打开设置",
+        "refresh": "刷新列表",
+        "create": "新增服务器"
+      },
+      "section": {
+        "title": "已注册服务器",
+        "subtitle": "数据来自 ~/.code-switch/mcp.json，修改后立即保存"
+      },
+      "list": {
+        "loading": "正在载入服务器...",
+        "empty": "暂无 MCP 服务器，点击下方按钮快速创建",
+        "loadError": "加载 MCP 服务器失败",
+        "saveError": "保存 MCP 服务器失败",
+        "edit": "编辑服务器",
+        "delete": "删除服务器",
+        "placeholderWarning": "请先替换变量：{vars}"
+      },
+      "toast": {
+        "placeholder": "请先替换变量：{vars}"
+      },
+      "status": {
+        "active": "已启用",
+        "inactive": "未启用"
+      },
+      "types": {
+        "stdio": "本地进程 (stdio)",
+        "stdioShort": "本地进程",
+        "http": "远程 HTTP",
+        "httpShort": "HTTP 服务"
+      },
+      "platforms": {
+        "claude": "Claude Code",
+        "codex": "Codex"
+      },
+      "form": {
+        "createTitle": "新增 MCP 服务器",
+        "editTitle": "编辑 MCP 服务器",
+        "name": "服务器名称",
+        "type": "类型",
+        "command": "执行命令",
+        "args": "命令参数",
+        "argsHint": "每行一个参数，保存时会自动按顺序传入",
+        "url": "服务地址",
+        "website": "官网地址",
+        "tips": "提示信息",
+        "tipsHint": "例如：请前往 ref.tools 获取 API Key",
+        "env": "环境变量",
+        "envKey": "变量名",
+        "envValue": "变量值",
+        "envAdd": "新增变量",
+        "envRemove": "删除变量",
+        "platforms": {
+          "title": "目标平台"
+        },
+        "actions": {
+          "cancel": "取消",
+          "save": "保存",
+          "delete": "删除"
+        },
+        "errors": {
+          "name": "请输入服务器名称",
+          "command": "stdio 类型需要提供 command",
+          "url": "http 类型需要提供 URL",
+          "duplicate": "名称已存在，请使用其他名称"
+        },
+        "deleteTitle": "删除 MCP 服务器",
+        "deleteMessage": "确认删除 {name} 吗？操作不可撤销"
+      }
+    },
+    "skill": {
+      "hero": {
+        "eyebrow": "Skill 仓库",
+        "title": "Claude Skill",
+        "lead": "从 Skill 仓库中获取 Claude Skill，点击右上角按钮可添加更多 Skill 仓库。"
+      },
+      "actions": {
+        "back": "返回首页",
+        "loading": "处理中...",
+        "refresh": "刷新列表",
+        "view": "查看 GitHub",
+        "install": "安装到 Claude Code",
+        "uninstall": "卸载",
+        "installError": "安装 {name} 失败，请重试",
+        "uninstallError": "卸载 {name} 失败，请重试"
+      },
+      "list": {
+        "title": "可用技能",
+        "subtitle": "描述信息来源于各目录内 SKILL.md 的 front matter。",
+        "loading": "正在加载技能...",
+        "empty": "仓库中没有可用技能。",
+        "error": "技能列表加载失败，请检查网络后重试。",
+        "noDescription": "SKILL.md 未提供描述",
+        "missingRepo": "缺少对应的仓库信息，无法安装"
+      },
+      "repos": {
+        "open": "管理仓库",
+        "title": "技能仓库",
+        "subtitle": "维护 GitHub 仓库以加载更多技能来源。",
+        "urlPlaceholder": "https://github.com/owner/repo",
+        "branchPlaceholder": "分支",
+        "addLabel": "新增仓库",
+        "viewLabel": "打开 GitHub",
+        "removeLabel": "删除仓库",
+        "loadError": "仓库列表加载失败",
+        "addError": "新增仓库失败",
+        "removeError": "删除仓库失败",
+        "formError": "请填写所有者和仓库名称",
+        "loading": "正在加载仓库...",
+        "empty": "当前没有配置任何仓库。",
+        "branchLabel": "分支：{branch}"
+      }
+    },
+    "themesetting": {
+      "select": {
+        "opt_light": "亮色模式",
+        "opt_dark": "暗色模式"
+      }
+    },
+    "shortcut": {
+      "title": "快捷键",
+      "helper": "按下需要的组合键，随时唤起应用。",
+      "rows": {
+        "openMain": "打开主窗口",
+        "openPreferences": "打开偏好设置窗口"
+      },
+      "descriptions": {
+        "openMain": "必须至少包含一个修饰键和一个主键",
+        "openPreferences": "建议设置不同的组合以避免冲突"
+      },
+      "messages": {
+        "saved": "快捷键已保存",
+        "failed": "快捷键保存失败",
+        "invalid": "组合无效，请包含修饰键"
+      },
+      "placeholder": "点击并按下组合键"
+    }
+  },
+  "gateway": {
+    "title": "NEW-API 统一网关配置",
+    "config": "网关设置",
+    "enabled": "启用 NEW-API 网关",
+    "url": "网关地址",
+    "token": "API Token",
+    "test": "测试连接",
+    "status": "连接状态",
+    "connected": "已连接",
+    "failed": "连接失败",
+    "user": "用户",
+    "userId": "用户 ID",
+    "quota": "配额",
+    "quotaTotal": "总配额",
+    "quotaUsed": "已使用",
+    "quotaRemain": "剩余",
+    "channels": "支持的渠道",
+    "channelsNote": "所有请求将通过 NEW-API 统一路由，实现集中计费与管理。"
+  },
+  "sync": {
+    "title": "同步中心",
+    "status": {
+      "connected": "已连接",
+      "disconnected": "未连接",
+      "enabled": "同步已启用",
+      "disabled": "同步已禁用",
+      "refreshed": "状态已刷新"
+    },
+    "system": {
+      "title": "系统状态",
+      "uptime": "运行时间",
+      "version": "版本",
+      "goroutines": "协程数",
+      "memory": "内存使用",
+      "natsStatus": "NATS 状态",
+      "activeRequests": "活跃请求"
+    },
+    "stats": {
+      "title": "统计概览",
+      "requests": "总请求数",
+      "tokens": "总 Token 数",
+      "cost": "总成本",
+      "successRate": "成功率",
+      "activeUsers": "活跃用户",
+      "providers": "供应商数",
+      "models": "模型数"
+    },
+    "online": {
+      "title": "在线状态",
+      "now": "当前在线",
+      "today": "24小时活跃"
+    },
+    "settings": {
+      "title": "同步设置",
+      "natsUrl": "NATS 服务器地址",
+      "natsUrlPlaceholder": "nats://localhost:4222",
+      "syncServerUrl": "同步服务地址",
+      "syncServerUrlPlaceholder": "http://localhost:8081",
+      "userId": "用户 ID",
+      "userIdPlaceholder": "输入用户标识",
+      "deviceName": "设备名称",
+      "deviceNamePlaceholder": "输入设备名称",
+      "test": "测试连接",
+      "testing": "测试中...",
+      "testSuccess": "连接成功",
+      "testFailed": "连接失败",
+      "save": "保存设置",
+      "saving": "保存中...",
+      "saved": "设置已保存",
+      "saveFailed": "保存失败"
+    }
+  },
+  "admin": {
+    "title": "管理后台",
+    "syncConnected": "同步服务已连接",
+    "syncDisconnected": "同步服务未连接",
+    "nav": {
+      "dashboard": "仪表盘",
+      "users": "用户管理",
+      "sessions": "会话管理",
+      "stats": "统计分析",
+      "audit": "审计日志",
+      "alerts": "告警管理",
+      "billing": "计费管理",
+      "billingSubscriptions": "订阅管理",
+      "billingBalances": "余额管理",
+      "billingPayments": "支付记录",
+      "billingSettings": "计费设置"
+    },
+    "dashboard": {
+      "title": "系统概览",
+      "systemStatus": "系统状态",
+      "statsOverview": "统计概览",
+      "onlineUsers": "在线用户",
+      "quickActions": "快捷操作",
+      "refresh": "刷新数据",
+      "loading": "加载中..."
+    },
+    "system": {
+      "title": "系统监控",
+      "uptime": "运行时间",
+      "version": "版本",
+      "goroutines": "协程数",
+      "memory": "内存使用",
+      "nats": "NATS 状态",
+      "activeRequests": "活跃请求",
+      "healthy": "健康",
+      "degraded": "降级",
+      "unhealthy": "异常"
+    },
+    "stats": {
+      "title": "统计分析",
+      "requests": "总请求数",
+      "tokens": "总 Token 数",
+      "cost": "总成本",
+      "successRate": "成功率",
+      "hourly": "小时统计",
+      "daily": "日统计",
+      "byProvider": "按供应商",
+      "byModel": "按模型",
+      "byUser": "按用户",
+      "noData": "暂无数据"
+    },
+    "online": {
+      "title": "在线状态",
+      "now": "当前在线",
+      "today": "今日活跃"
+    },
+    "users": {
+      "title": "用户管理",
+      "list": "用户列表",
+      "search": "搜索用户",
+      "searchPlaceholder": "输入用户名或邮箱",
+      "showDisabled": "仅显示禁用用户",
+      "username": "用户名",
+      "email": "邮箱",
+      "role": "角色",
+      "status": "状态",
+      "createdAt": "注册时间",
+      "lastActive": "最后活跃",
+      "actions": "操作",
+      "admin": "管理员",
+      "user": "普通用户",
+      "active": "正常",
+      "disabled": "已禁用",
+      "enable": "启用",
+      "disable": "禁用",
+      "setAdmin": "设为管理员",
+      "removeAdmin": "取消管理员",
+      "viewDetail": "查看详情",
+      "noUsers": "暂无用户数据",
+      "totalUsers": "共 {count} 个用户",
+      "detail": {
+        "title": "用户详情",
+        "basicInfo": "基本信息",
+        "statistics": "使用统计",
+        "requests": "请求数",
+        "tokens": "Token 用量",
+        "cost": "消费金额",
+        "sessions": "会话数",
+        "messages": "消息数",
+        "devices": "设备数",
+        "loginCount": "登录次数"
+      }
+    },
+    "sessions": {
+      "title": "会话管理",
+      "list": "会话列表",
+      "filterByUser": "按用户筛选",
+      "allUsers": "全部用户",
+      "sessionId": "会话 ID",
+      "userId": "用户 ID",
+      "sessionTitle": "会话标题",
+      "messageCount": "消息数",
+      "tokenCount": "Token 数",
+      "cost": "成本",
+      "createdAt": "创建时间",
+      "lastMessage": "最后消息",
+      "actions": "操作",
+      "viewDetail": "查看详情",
+      "delete": "删除",
+      "confirmDelete": "确认删除此会话？",
+      "deleteSuccess": "会话已删除",
+      "deleteFailed": "删除失败",
+      "noSessions": "暂无会话数据",
+      "totalSessions": "共 {count} 个会话",
+      "detail": {
+        "title": "会话详情",
+        "info": "会话信息",
+        "messages": "消息记录",
+        "role": "角色",
+        "content": "内容",
+        "model": "模型",
+        "tokens": "Token",
+        "time": "时间"
+      }
+    },
+    "audit": {
+      "title": "审计日志",
+      "list": "操作日志",
+      "filterByUser": "按用户筛选",
+      "filterByAction": "按操作筛选",
+      "filterByResult": "按结果筛选",
+      "allUsers": "全部用户",
+      "allActions": "全部操作",
+      "allResults": "全部结果",
+      "startTime": "开始时间",
+      "endTime": "结束时间",
+      "logId": "日志 ID",
+      "userId": "用户 ID",
+      "username": "用户名",
+      "action": "操作",
+      "resourceType": "资源类型",
+      "resourceId": "资源 ID",
+      "result": "结果",
+      "ipAddress": "IP 地址",
+      "createdAt": "时间",
+      "details": "详情",
+      "success": "成功",
+      "failure": "失败",
+      "blocked": "已阻止",
+      "noLogs": "暂无审计日志",
+      "totalLogs": "共 {count} 条日志"
+    },
+    "alerts": {
+      "title": "告警管理",
+      "rules": "告警规则",
+      "history": "告警历史",
+      "createRule": "新建规则",
+      "editRule": "编辑规则",
+      "ruleName": "规则名称",
+      "ruleNamePlaceholder": "输入规则名称",
+      "description": "描述",
+      "descriptionPlaceholder": "输入规则描述",
+      "metric": "监控指标",
+      "condition": "触发条件",
+      "threshold": "阈值",
+      "windowSeconds": "时间窗口(秒)",
+      "severity": "严重级别",
+      "enabled": "启用状态",
+      "notifyChannels": "通知渠道",
+      "webhookUrl": "Webhook 地址",
+      "webhookUrlPlaceholder": "https://your-webhook-url",
+      "actions": "操作",
+      "edit": "编辑",
+      "delete": "删除",
+      "confirmDelete": "确认删除此规则？",
+      "deleteSuccess": "规则已删除",
+      "deleteFailed": "删除失败",
+      "saveSuccess": "规则已保存",
+      "saveFailed": "保存失败",
+      "noRules": "暂无告警规则",
+      "metrics": {
+        "error_rate": "错误率",
+        "latency_p99": "P99 延迟",
+        "latency_avg": "平均延迟",
+        "cost_daily": "日成本",
+        "requests_per_minute": "每分钟请求数"
+      },
+      "conditions": {
+        "gt": "大于",
+        "lt": "小于",
+        "gte": "大于等于",
+        "lte": "小于等于",
+        "eq": "等于"
+      },
+      "severities": {
+        "info": "提示",
+        "warning": "警告",
+        "critical": "严重"
+      },
+      "channels": {
+        "webhook": "Webhook",
+        "email": "邮件"
+      },
+      "historyTitle": "告警历史记录",
+      "filterBySeverity": "按级别筛选",
+      "filterByStatus": "按状态筛选",
+      "allSeverities": "全部级别",
+      "allStatuses": "全部状态",
+      "ruleId": "规则 ID",
+      "metricValue": "指标值",
+      "status": "状态",
+      "triggeredAt": "触发时间",
+      "resolvedAt": "恢复时间",
+      "firing": "告警中",
+      "resolved": "已恢复",
+      "noHistory": "暂无告警历史"
+    },
+    "billing": {
+      "subscriptions": {
+        "title": "订阅管理",
+        "create": "新建订阅",
+        "createTitle": "创建订阅",
+        "filterUserId": "用户 ID",
+        "filterStatus": "订阅状态",
+        "filterPlan": "订阅套餐",
+        "userId": "用户 ID",
+        "userIdPlaceholder": "输入用户 ID",
+        "userIdRequired": "请输入用户 ID",
+        "plan": "订阅套餐",
+        "planPlaceholder": "选择套餐",
+        "planRequired": "请选择套餐",
+        "colUserId": "用户 ID",
+        "colUsername": "用户名",
+        "colPlan": "套餐",
+        "colStatus": "状态",
+        "colStartedAt": "开始时间",
+        "colEndingAt": "结束时间",
+        "statusActive": "生效中",
+        "statusPending": "待生效",
+        "statusCanceled": "已取消",
+        "statusTerminated": "已终止",
+        "statusPastDue": "已逾期",
+        "cancel": "取消订阅",
+        "reactivate": "重新激活",
+        "createSuccess": "订阅创建成功",
+        "cancelSuccess": "订阅已取消",
+        "reactivateSuccess": "订阅已重新激活",
+        "statusExpired": "已过期",
+        "statusCancelled": "已取消",
+        "initPlans": "初始化套餐",
+        "initPlansSuccess": "套餐初始化成功",
+        "totalSubscriptions": "总订阅数",
+        "activeSubscriptions": "活跃订阅",
+        "expiredSubscriptions": "过期订阅",
+        "byPlan": "按套餐",
+        "colCurrentGroup": "当前模型组",
+        "colDailyQuota": "今日额度",
+        "colExpiresAt": "到期时间",
+        "detailTitle": "订阅详情",
+        "currentGroup": "当前模型组",
+        "fallback": "降级",
+        "dailyQuota": "每日额度",
+        "dailyUsage": "今日使用",
+        "totalQuota": "总额度",
+        "remaining": "剩余",
+        "lastDailyReset": "上次重置",
+        "expiresAt": "到期时间",
+        "autoRenew": "自动续费",
+        "createdAt": "创建时间",
+        "resetDaily": "重置今日额度",
+        "resetDailySuccess": "今日额度已重置"
+      },
+      "balances": {
+        "title": "余额管理",
+        "create": "创建钱包",
+        "createTitle": "创建用户钱包",
+        "filterUserId": "用户 ID",
+        "filterStatus": "钱包状态",
+        "userId": "用户 ID",
+        "userIdPlaceholder": "输入用户 ID",
+        "userIdRequired": "请输入用户 ID",
+        "name": "钱包名称",
+        "namePlaceholder": "输入钱包名称（可选）",
+        "currency": "货币",
+        "currencyPlaceholder": "选择货币",
+        "colUserId": "用户 ID",
+        "colUsername": "用户名",
+        "colName": "钱包名称",
+        "colBalance": "余额",
+        "colCredits": "积分",
+        "colStatus": "状态",
+        "colCreatedAt": "创建时间",
+        "statusActive": "正常",
+        "statusTerminated": "已关闭",
+        "topUp": "充值",
+        "viewTransactions": "交易记录",
+        "topUpTitle": "钱包充值",
+        "paidCredits": "充值金额",
+        "paidCreditsPlaceholder": "输入充值金额",
+        "paidCreditsRequired": "请输入充值金额",
+        "grantedCredits": "赠送金额",
+        "grantedCreditsPlaceholder": "输入赠送金额（可选）",
+        "createSuccess": "钱包创建成功",
+        "topUpSuccess": "充值成功",
+        "transactions": "交易记录",
+        "txType": "类型",
+        "txTransactionType": "交易类型",
+        "txAmount": "金额",
+        "txCredits": "积分",
+        "txStatus": "状态",
+        "txCreatedAt": "时间"
+      },
+      "payments": {
+        "title": "支付记录",
+        "create": "创建订单",
+        "createTitle": "创建支付订单",
+        "filterUserId": "用户 ID",
+        "filterStatus": "支付状态",
+        "filterMethod": "支付方式",
+        "startTime": "开始时间",
+        "endTime": "结束时间",
+        "userId": "用户 ID",
+        "userIdPlaceholder": "输入用户 ID",
+        "userIdRequired": "请输入用户 ID",
+        "amount": "金额",
+        "amountPlaceholder": "输入金额",
+        "amountRequired": "请输入金额",
+        "method": "支付方式",
+        "methodPlaceholder": "选择支付方式",
+        "methodRequired": "请选择支付方式",
+        "methodAlipay": "支付宝",
+        "methodWechat": "微信支付",
+        "methodManual": "人工确认",
+        "description": "备注",
+        "descriptionPlaceholder": "输入备注信息（可选）",
+        "colOrderNo": "订单号",
+        "colUserId": "用户 ID",
+        "colUsername": "用户名",
+        "colAmount": "金额",
+        "colMethod": "支付方式",
+        "colStatus": "状态",
+        "colDescription": "备注",
+        "colCreatedAt": "创建时间",
+        "statusPending": "待支付",
+        "statusPaid": "已支付",
+        "statusFailed": "支付失败",
+        "statusRefunded": "已退款",
+        "statusCanceled": "已取消",
+        "confirm": "确认到账",
+        "refund": "退款",
+        "refundTitle": "退款操作",
+        "refundAmount": "退款金额",
+        "refundAmountPlaceholder": "输入退款金额",
+        "refundReason": "退款原因",
+        "refundReasonPlaceholder": "输入退款原因（可选）",
+        "confirmRefund": "确认退款",
+        "totalRevenue": "总收入",
+        "pendingCount": "待支付",
+        "paidCount": "已支付",
+        "refundedCount": "已退款",
+        "createSuccess": "订单创建成功",
+        "confirmSuccess": "已确认到账",
+        "refundSuccess": "退款成功"
+      },
+      "settings": {
+        "title": "计费设置",
+        "serviceStatus": "服务状态",
+        "enabled": "计费服务已启用",
+        "disabled": "计费服务未启用",
+        "general": "基础设置",
+        "enableBilling": "启用计费",
+        "requireSubscription": "强制订阅验证",
+        "gracePeriodHours": "宽限期(小时)",
+        "casdoor": "Casdoor 认证服务",
+        "casdoorEndpoint": "服务地址",
+        "casdoorEndpointPlaceholder": "https://auth.example.com",
+        "casdoorClientId": "Client ID",
+        "casdoorClientIdPlaceholder": "输入 Client ID",
+        "casdoorClientSecret": "Client Secret",
+        "casdoorClientSecretPlaceholder": "输入 Client Secret",
+        "casdoorOrganization": "组织",
+        "casdoorOrganizationPlaceholder": "输入组织名称",
+        "casdoorApplication": "应用",
+        "casdoorApplicationPlaceholder": "输入应用名称",
+        "casdoorCertificate": "证书",
+        "casdoorCertificatePlaceholder": "输入证书内容",
+        "lago": "Lago 计费服务",
+        "lagoApiUrl": "API 地址",
+        "lagoApiUrlPlaceholder": "https://api.getlago.com",
+        "lagoApiKey": "API Key",
+        "lagoApiKeyPlaceholder": "输入 API Key",
+        "alipay": "支付宝配置",
+        "alipayAppId": "App ID",
+        "alipayAppIdPlaceholder": "输入支付宝 App ID",
+        "alipayPrivateKey": "应用私钥",
+        "alipayPrivateKeyPlaceholder": "输入应用私钥",
+        "alipayPublicKey": "支付宝公钥",
+        "alipayPublicKeyPlaceholder": "输入支付宝公钥",
+        "alipaySandbox": "沙箱模式",
+        "wechat": "微信支付配置",
+        "wechatAppId": "App ID",
+        "wechatAppIdPlaceholder": "输入微信 App ID",
+        "wechatMchId": "商户号",
+        "wechatMchIdPlaceholder": "输入商户号",
+        "wechatApiKey": "API 密钥",
+        "wechatApiKeyPlaceholder": "输入 API 密钥",
+        "wechatApiKeyV3": "API V3 密钥",
+        "wechatApiKeyV3Placeholder": "输入 API V3 密钥",
+        "wechatSerialNo": "证书序列号",
+        "wechatSerialNoPlaceholder": "输入证书序列号",
+        "wechatPrivateKey": "商户私钥",
+        "wechatPrivateKeyPlaceholder": "输入商户私钥",
+        "callbacks": "回调地址",
+        "notifyUrl": "异步通知地址",
+        "notifyUrlPlaceholder": "https://your-domain.com/api/payment/notify",
+        "returnUrl": "同步跳转地址",
+        "returnUrlPlaceholder": "https://your-domain.com/payment/result",
+        "testConnection": "测试连接",
+        "testSuccess": "连接成功",
+        "testFailed": "连接失败",
+        "saveSuccess": "设置已保存"
+      }
+    }
+  },
+  "circuitBreaker": {
+    "title": "熔断器状态",
+    "loading": "加载中...",
+    "noData": "暂无熔断器数据",
+    "loadError": "加载熔断器数据失败",
+    "resetError": "重置熔断器失败",
+    "manualReset": "手动恢复",
+    "successRate": "成功率",
+    "totalRequests": "总请求数",
+    "failures": "连续失败",
+    "lastFailure": "最后失败",
+    "circuitOpened": "熔断触发",
+    "health": "健康度",
+    "states": {
+      "closed": "正常",
+      "open": "熔断",
+      "half_open": "半开"
+    }
+  },
+  "proxyControl": {
+    "title": "代理控制",
+    "description": "为每个应用独立控制代理状态，支持动态启用/禁用而不影响其他应用。",
+    "loading": "加载配置中...",
+    "loadError": "加载代理配置失败",
+    "toggleError": "切换代理状态失败",
+    "enabled": "已启用",
+    "disabled": "已禁用",
+    "active": "运行中",
+    "inactive": "已停用",
+    "enableSuccess": "{app} 代理已启用",
+    "disableSuccess": "{app} 代理已禁用",
+    "totalRequests": "总请求数",
+    "lastRequest": "最后请求",
+    "allEnabled": "所有应用代理已启用",
+    "allDisabled": "所有应用代理已禁用",
+    "partialEnabled": "{enabled}/{total} 个应用代理已启用",
+    "apps": {
+      "claude": {
+        "description": "Anthropic Claude Code CLI 代理控制"
+      },
+      "codex": {
+        "description": "OpenAI Codex CLI 代理控制"
+      },
+      "gemini": {
+        "description": "Google Gemini CLI 代理控制"
+      }
+    }
+  }
+}

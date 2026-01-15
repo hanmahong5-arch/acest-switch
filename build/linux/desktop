@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Name=Ailurus PaaS
+Comment=AI Provider Gateway for TUI and GUI Applications - Manage providers, relays, and request logs.
+# The Exec line includes %u to pass the URL to the application
+Exec=/usr/local/bin/CodeSwitch %u
+Terminal=false
+Type=Application
+Icon=CodeSwitch
+Categories=Utility;
+StartupWMClass=CodeSwitch
+
+ 

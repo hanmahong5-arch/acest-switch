@@ -1,0 +1,42 @@
+{
+  "name": "ailurus-paas-frontend",
+  "private": true,
+  "version": "0.3.0",
+  "type": "module",
+  "description": "Ailurus PaaS - AI Provider Gateway Frontend",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hanmahong5-arch/acest-switch.git"
+  },
+  "author": "hanmahong5-arch",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "vite",
+    "build:dev": "vue-tsc && vite build --minify false --mode development",
+    "build": "vue-tsc && vite build --mode production",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@headlessui/vue": "^1.7.23",
+    "@lobehub/icons-static-svg": "^1.73.0",
+    "@vicons/ionicons5": "^0.13.0",
+    "@vueuse/core": "^14.1.0",
+    "@wailsio/runtime": "^3.0.0-alpha.72",
+    "chart.js": "^4.5.1",
+    "naive-ui": "^2.43.2",
+    "pinia": "^3.0.4",
+    "vue": "^3.5.23",
+    "vue-chartjs": "^5.3.3",
+    "vue-i18n": "^11.1.12",
+    "vue-router": "^4.6.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.17",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.17",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.1",
+    "vue-tsc": "^3.1.3"
+  }
+}
