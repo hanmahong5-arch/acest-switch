@@ -59,6 +59,61 @@
         </svg>
       </button>
       <button
+        class="ghost-icon cli-center-btn"
+        data-tooltip="CLI Configuration Center"
+        @click="goToCliCenter"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M4 17l6-6-6-6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M12 19h8"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
+      <button
+        class="ghost-icon distributor-btn"
+        data-tooltip="AI Evangelist Mode"
+        @click="goToDistributor"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <circle
+            cx="9"
+            cy="7"
+            r="4"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          />
+          <path
+            d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+      <button
         class="ghost-icon"
         :data-tooltip="t('components.main.controls.settings')"
         @click="goToSettings"
@@ -380,27 +435,32 @@ const proxyStates = reactive<Record<ProviderTab, boolean>>({
   claude: false,
   codex: false,
   'gemini-cli': false,
+  picoclaw: false,
 })
 const proxyBusy = reactive<Record<ProviderTab, boolean>>({
   claude: false,
   codex: false,
   'gemini-cli': false,
+  picoclaw: false,
 })
 
 const providerStatsMap = reactive<Record<ProviderTab, Record<string, ProviderDailyStat>>>({
   claude: {},
   codex: {},
   'gemini-cli': {},
+  picoclaw: {},
 } as Record<ProviderTab, Record<string, ProviderDailyStat>>)
 const providerStatsLoading = reactive<Record<ProviderTab, boolean>>({
   claude: false,
   codex: false,
   'gemini-cli': false,
+  picoclaw: false,
 } as Record<ProviderTab, boolean>)
 const providerStatsLoaded = reactive<Record<ProviderTab, boolean>>({
   claude: false,
   codex: false,
   'gemini-cli': false,
+  picoclaw: false,
 } as Record<ProviderTab, boolean>)
 let providerStatsTimer: number | undefined
 let updateTimer: number | undefined
@@ -513,6 +573,7 @@ const tabs = [
   { id: 'claude', label: 'Claude Code' },
   { id: 'codex', label: 'Codex' },
   { id: 'gemini-cli', label: 'Gemini-CLI' },
+  { id: 'picoclaw', label: 'PicoClaw' },
 ] as const
 type ProviderTab = (typeof tabs)[number]['id']
 const providerTabIds = tabs.map((tab) => tab.id) as ProviderTab[]
@@ -521,6 +582,7 @@ const cards = reactive<Record<ProviderTab, AutomationCard[]>>({
   claude: createAutomationCards(automationCardGroups.claude),
   codex: createAutomationCards(automationCardGroups.codex),
   'gemini-cli': createAutomationCards(automationCardGroups['gemini-cli']),
+  picoclaw: createAutomationCards(automationCardGroups.picoclaw),
 })
 const draggingId = ref<number | null>(null)
 
@@ -776,6 +838,14 @@ const goToGateway = () => {
 
 const goToSettings = () => {
   router.push('/settings')
+}
+
+const goToCliCenter = () => {
+  router.push('/cli-center')
+}
+
+const goToDistributor = () => {
+  router.push('/distributor')
 }
 
 const goToAdmin = () => {

@@ -68,6 +68,8 @@ func providerFilePath(kind string) (string, error) {
 		filename = "codex.json"
 	case "gemini-cli", "gemini_cli", "gemini":
 		filename = "gemini-cli.json"
+	case "picoclaw", "pico-claw", "pico_claw":
+		filename = "picoclaw.json"
 	default:
 		return "", fmt.Errorf("unknown provider type: %s", kind)
 	}

@@ -9,9 +9,9 @@ import { Provider as BackendProvider } from '../../bindings/codeswitch/services/
 // 重新导出类型
 export type Provider = BackendProvider
 
-export type ProviderTab = 'claude' | 'codex' | 'gemini-cli'
+export type ProviderTab = 'claude' | 'codex' | 'gemini-cli' | 'picoclaw'
 
-export const PROVIDER_TABS: ProviderTab[] = ['claude', 'codex', 'gemini-cli']
+export const PROVIDER_TABS: ProviderTab[] = ['claude', 'codex', 'gemini-cli', 'picoclaw']
 
 export const useProviderStore = defineStore('providers', () => {
   // 状态
@@ -19,30 +19,35 @@ export const useProviderStore = defineStore('providers', () => {
     claude: [],
     codex: [],
     'gemini-cli': [],
+    picoclaw: [],
   })
 
   const loading = ref<Record<ProviderTab, boolean>>({
     claude: false,
     codex: false,
     'gemini-cli': false,
+    picoclaw: false,
   })
 
   const stats = ref<Record<ProviderTab, Record<string, ProviderDailyStat>>>({
     claude: {},
     codex: {},
     'gemini-cli': {},
+    picoclaw: {},
   })
 
   const statsLoading = ref<Record<ProviderTab, boolean>>({
     claude: false,
     codex: false,
     'gemini-cli': false,
+    picoclaw: false,
   })
 
   const statsLoaded = ref<Record<ProviderTab, boolean>>({
     claude: false,
     codex: false,
     'gemini-cli': false,
+    picoclaw: false,
   })
 
   // Getters

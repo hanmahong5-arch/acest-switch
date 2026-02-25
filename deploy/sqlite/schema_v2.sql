@@ -105,7 +105,8 @@ CREATE TABLE IF NOT EXISTS proxy_control (
 INSERT OR IGNORE INTO proxy_control (app_name, proxy_enabled) VALUES
     ('claude', 1),
     ('codex', 1),
-    ('gemini', 1);
+    ('gemini', 1),
+    ('picoclaw', 1);
 
 -- ============================================================
 -- 4. Proxy Live Backup (配置热备份)

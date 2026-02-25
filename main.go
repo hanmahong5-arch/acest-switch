@@ -2,6 +2,10 @@ package main
 
 import (
 	"codeswitch/services"
+	"codeswitch/services/cluster"
+	"codeswitch/services/distributor"
+	"codeswitch/services/membership"
+	"codeswitch/services/monitoring"
 	"database/sql"
 	"embed"
 	_ "embed"
@@ -106,6 +110,8 @@ func main() {
 	claudeSettings := services.NewClaudeSettingsService(providerRelay.Addr())
 	codexSettings := services.NewCodexSettingsService(providerRelay.Addr())
 	geminiCliSettings := services.NewGeminiCLISettingsService()
+	picoClawSettings := services.NewPicoClawSettingsService(providerRelay.Addr())
+	cliCenterService := services.NewCLICenterService(claudeSettings, codexSettings, geminiCliSettings, picoClawSettings, providerRelay.Addr())
 	logService := services.NewLogService()
 	autoStartService := services.NewAutoStartService()
 	appSettings := services.NewAppSettingsService(autoStartService)
@@ -118,6 +124,17 @@ func main() {
 	// 初始化同步服务（多端同步功能）
 	syncSettingsService := services.NewSyncSettingsService()
 	services.InitSyncIntegration(syncSettingsService)
+
+	// Initialize K3s cluster management service (Admin Gateway)
+	clusterService := cluster.NewClusterService()
+	membershipService := membership.NewMembershipService()
+	monitoringService := monitoring.NewMonitoringService()
+
+	// Initialize Agent service (Agent Mode)
+	agentService := services.NewAgentService()
+
+	// Initialize Distributor service (AI Evangelist Mode)
+	distributorService := distributor.NewDistributorService()
 	if si := services.GetSyncIntegration(); si != nil {
 		providerRelay.SetSyncIntegration(si)
 		if si.IsEnabled() {
@@ -167,6 +184,8 @@ func main() {
 			application.NewService(claudeSettings),
 			application.NewService(codexSettings),
 			application.NewService(geminiCliSettings),
+			application.NewService(picoClawSettings),
+			application.NewService(cliCenterService),
 			application.NewService(logService),
 			application.NewService(appSettings),
 			application.NewService(mcpService),
@@ -175,6 +194,11 @@ func main() {
 			application.NewService(dockService),
 			application.NewService(versionService),
 			application.NewService(syncSettingsService),
+			application.NewService(clusterService),
+			application.NewService(membershipService),
+			application.NewService(monitoringService),
+			application.NewService(agentService),
+			application.NewService(distributorService),
 		},
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),

@@ -173,6 +173,15 @@ const apps = ref<AppConfig[]>([
     iconColor: '#3B82F6',
     enabled: true,
     toggling: false
+  },
+  {
+    name: 'picoclaw',
+    label: 'PicoClaw',
+    description: t('proxyControl.apps.picoclaw.description'),
+    icon: CodeSlashOutline,
+    iconColor: '#8B5CF6',
+    enabled: true,
+    toggling: false
   }
 ])
 

@@ -416,6 +416,10 @@ func TestNormalizeAppName(t *testing.T) {
 		{"gemini", "gemini"},
 		{"gemini-cli", "gemini"},
 		{"gemini_cli", "gemini"},
+		{"picoclaw", "picoclaw"},
+		{"pico-claw", "picoclaw"},
+		{"pico_claw", "picoclaw"},
+		{"pico", "picoclaw"},
 		{"unknown", "unknown"},
 	}
 

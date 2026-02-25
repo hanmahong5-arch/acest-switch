@@ -5,7 +5,7 @@
 [![Go Version](https://img.shields.io/badge/go-1.24+-blue.svg)](https://golang.org)
 [![Wails](https://img.shields.io/badge/wails-v3-green.svg)](https://wails.io)
 
-集中管理 Claude Code、Codex、Gemini CLI 供应商的统一 AI 网关
+集中管理 Claude Code、Codex、Gemini CLI、PicoClaw 供应商的统一 AI 网关
 
 🌐 **GitHub**: [https://github.com/hanmahong5-arch/acest-switch](https://github.com/hanmahong5-arch/acest-switch)
 
@@ -13,7 +13,7 @@
 
 ### 统一 LLM 调用
 - **NEW-API 统一网关**：所有 AI 请求通过 NEW-API (localhost:3000) 统一路由
-- **多平台支持**：Claude Code、Codex CLI、Gemini CLI 统一接入
+- **多平台支持**：Claude Code、Codex CLI、Gemini CLI、PicoClaw 统一接入
 - **格式自动转换**：Gemini Native API ↔ OpenAI 格式自动转换
 
 ### 智能路由
@@ -27,7 +27,7 @@
 - 配额变更通过 NATS 实时广播
 
 ### MCP & Skill 管理
-- 支持 Claude Code & Codex MCP Server 双平台管理
+- 支持 Claude Code、Codex、PicoClaw MCP Server 多平台管理
 - 支持 Claude Skill 自动下载与安装
 - 内置 2 个流行的 skill 仓库，支持添加自定义仓库
 
@@ -52,16 +52,17 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  Client Layer (Claude Code / Codex / Gemini CLI)                │
+│  Client Layer (Claude Code / Codex / Gemini CLI / PicoClaw)     │
 └───────────────────────────┬─────────────────────────────────────┘
                             │ HTTP
                             ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │  CodeSwitch Gateway (:18100)                                    │
-│  ├─ /v1/messages      → Claude (Anthropic format)               │
-│  ├─ /responses        → Codex (OpenAI Responses API)            │
-│  ├─ /v1/chat/completions → Generic (OpenAI format)              │
-│  └─ /v1beta/models/*  → Gemini (Native → OpenAI 转换)           │
+│  ├─ /v1/messages            → Claude (Anthropic format)         │
+│  ├─ /responses              → Codex (OpenAI Responses API)      │
+│  ├─ /v1/chat/completions    → Codex (OpenAI format)             │
+│  ├─ /pc/v1/chat/completions → PicoClaw (OpenAI format)          │
+│  └─ /v1beta/models/*        → Gemini (Native → OpenAI 转换)    │
 └───────────────────────────┬─────────────────────────────────────┘
                             │
           ┌─────────────────┼─────────────────┐
@@ -77,12 +78,13 @@
 
 ## 实现原理
 
-应用启动时会在本地 18100 端口创建 HTTP 代理服务器，并自动更新 Claude Code、Codex、Gemini CLI 配置，指向 `http://127.0.0.1:18100`。
+应用启动时会在本地 18100 端口创建 HTTP 代理服务器，并自动更新 Claude Code、Codex、Gemini CLI、PicoClaw 配置，指向 `http://127.0.0.1:18100`。
 
 代理内部暴露的关键端点：
 - `/v1/messages` - 转发到 Claude 供应商 (Anthropic 格式)
 - `/responses` - 转发到 Codex 供应商 (OpenAI Responses API)
-- `/v1/chat/completions` - 通用 OpenAI 兼容端点
+- `/v1/chat/completions` - 转发到 Codex 供应商 (OpenAI 格式)
+- `/pc/v1/chat/completions` - 转发到 PicoClaw 供应商 (OpenAI 格式，`/pc/` 前缀区分)
 - `/v1beta/models/*` - Gemini 原生 API (自动转换格式)
 
 **NEW-API 统一网关模式** (推荐)：
@@ -136,7 +138,7 @@
 
 - Go 1.24+
 - Node.js 18+
-- npm / pnpm / yarn
+- Bun 1.x+
 - Wails 3 CLI：`go install github.com/wailsapp/wails/v3/cmd/wails3@latest`
 
 ## 开发运行
@@ -176,8 +178,9 @@ wails3 task dev
 codeswitch/
 ├── main.go                    # 程序入口
 ├── services/
-│   ├── providerrelay.go       # HTTP 代理 + NEW-API 转发
+│   ├── providerrelay.go       # HTTP 代理 + NEW-API 转发 + PicoClaw /pc/ 路由
 │   ├── providerservice.go     # Provider CRUD
+│   ├── picoclawsettings.go    # PicoClaw CLI 配置管理
 │   ├── appsettings.go         # 应用设置 (含 NEW-API 配置)
 │   ├── sync_integration.go    # NATS 事件钩子
 │   └── sync/                  # NATS 客户端
@@ -213,6 +216,7 @@ codeswitch/
 
 | 版本 | 更新内容 |
 |------|---------|
+| v0.3.1 | PicoClaw 支持 (第 4 个 CLI 平台，`/pc/` 路由前缀) |
 | v0.3.0 | 运维监控后台 (Admin) + 告警系统 + 审计日志 + 熔断器 + 代理控制 |
 | v0.2.0 | NEW-API 统一网关 + NATS 消息总线 + 计费集成 |
 | v0.1.9 | Gemini CLI 支持 + 格式转换 |

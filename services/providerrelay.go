@@ -55,8 +55,8 @@ type ProviderRelayService struct {
 	newAPIURL     string // new-api 服务地址
 	newAPIToken   string // new-api API Token
 
-	// 计费集成 (Casdoor + Lago + gopay)
-	billingIntegration *BillingIntegration
+	// Lurus-API 集成 (替代 Casdoor + Lago)
+	lurusIntegration *LurusIntegration
 
 	// Proxy Control (Phase 3)
 	proxyController *ProxyController
@@ -75,9 +75,9 @@ func NewProviderRelayService(providerService *ProviderService, addr string) *Pro
 
 	if err := xdb.Inits([]xdb.Config{
 		{
-			Name:        "default",
-			Driver:      "sqlite",
-			DSN:         filepath.Join(home, ".code-switch", "app.db"+sqliteOptions),
+			Name:   "default",
+			Driver: "sqlite",
+			DSN:    filepath.Join(home, ".code-switch", "app.db"+sqliteOptions),
 			// 使用写入队列后，减少连接池避免资源浪费
 			// 1 个写入线程 + 几个并发查询足够
 			MaxOpenConn: 5,
@@ -112,15 +112,15 @@ func NewProviderRelayService(providerService *ProviderService, addr string) *Pro
 	}
 
 	prs := &ProviderRelayService{
-		providerService:    providerService,
-		pricingService:     pricingSvc,
-		addr:               addr,
-		startTime:          time.Now(),
-		logWriteQueue:      make(chan *ReqeustLog, 1000),        // 缓冲 1000 条日志
-		bodyLogQueue:       make(chan *RequestLogBody, 500),    // Body 日志队列，较小缓冲
-		billingIntegration: NewBillingIntegration(),
-		proxyController:    pc,
-		configRecovery:     cr,
+		providerService:  providerService,
+		pricingService:   pricingSvc,
+		addr:             addr,
+		startTime:        time.Now(),
+		logWriteQueue:    make(chan *ReqeustLog, 1000),    // 缓冲 1000 条日志
+		bodyLogQueue:     make(chan *RequestLogBody, 500), // Body 日志队列，较小缓冲
+		lurusIntegration: NewLurusIntegration(),
+		proxyController:  pc,
+		configRecovery:   cr,
 	}
 
 	// 启动单个 goroutine 处理所有日志写入，避免写锁竞争
@@ -132,9 +132,9 @@ func NewProviderRelayService(providerService *ProviderService, addr string) *Pro
 	// 启动过期 Body 日志清理任务
 	go prs.startBodyLogCleanupTask()
 
-	// 初始化计费集成 (从配置文件或环境变量)
-	if err := prs.billingIntegration.Initialize(); err != nil {
-		fmt.Printf("[Billing] 初始化失败: %v\n", err)
+	// 初始化 Lurus-API 集成 (从配置文件)
+	if err := prs.lurusIntegration.Initialize(); err != nil {
+		fmt.Printf("[Lurus] 初始化失败: %v\n", err)
 	}
 
 	return prs
@@ -173,7 +173,7 @@ func (prs *ProviderRelayService) Start() error {
 func (prs *ProviderRelayService) validateConfig() []string {
 	warnings := make([]string, 0)
 
-	for _, kind := range []string{"claude", "codex", "gemini-cli"} {
+	for _, kind := range []string{"claude", "codex", "gemini-cli", "picoclaw"} {
 		providers, err := prs.providerService.LoadProviders(kind)
 		if err != nil {
 			warnings = append(warnings, fmt.Sprintf("[%s] 加载配置失败: %v", kind, err))
@@ -215,9 +215,9 @@ func (prs *ProviderRelayService) Stop() error {
 	if prs.server == nil {
 		return nil
 	}
-	// 关闭计费服务
-	if prs.billingIntegration != nil {
-		prs.billingIntegration.Shutdown()
+	// 关闭 Lurus 服务
+	if prs.lurusIntegration != nil {
+		prs.lurusIntegration.Shutdown()
 	}
 	// 关闭日志队列
 	close(prs.logWriteQueue)
@@ -228,23 +228,23 @@ func (prs *ProviderRelayService) Stop() error {
 }
 
 // ============================================================
-// Billing Integration Methods
+// Lurus Integration Methods
 // ============================================================
 
-// GetBillingIntegration returns the billing integration instance
-func (prs *ProviderRelayService) GetBillingIntegration() *BillingIntegration {
-	return prs.billingIntegration
+// GetLurusIntegration returns the Lurus integration instance
+func (prs *ProviderRelayService) GetLurusIntegration() *LurusIntegration {
+	return prs.lurusIntegration
 }
 
-// IsBillingEnabled returns whether billing is enabled
-func (prs *ProviderRelayService) IsBillingEnabled() bool {
-	return prs.billingIntegration != nil && prs.billingIntegration.IsEnabled()
+// IsLurusEnabled returns whether Lurus integration is enabled
+func (prs *ProviderRelayService) IsLurusEnabled() bool {
+	return prs.lurusIntegration != nil && prs.lurusIntegration.IsEnabled()
 }
 
-// SetBillingEnabled enables or disables billing
-func (prs *ProviderRelayService) SetBillingEnabled(enabled bool) {
-	if prs.billingIntegration != nil {
-		prs.billingIntegration.SetEnabled(enabled)
+// SetLurusEnabled enables or disables Lurus integration
+func (prs *ProviderRelayService) SetLurusEnabled(enabled bool) {
+	if prs.lurusIntegration != nil {
+		prs.lurusIntegration.SetEnabled(enabled)
 	}
 }
 
@@ -557,10 +557,12 @@ func (prs *ProviderRelayService) registerRoutes(router gin.IRouter) {
 		claudeProviders, _ := prs.providerService.LoadProviders("claude")
 		codexProviders, _ := prs.providerService.LoadProviders("codex")
 		geminiProviders, _ := prs.providerService.LoadProviders("gemini-cli")
+		picoClawProviders, _ := prs.providerService.LoadProviders("picoclaw")
 
 		claudeReady := 0
 		codexReady := 0
 		geminiReady := 0
+		picoClawReady := 0
 		for _, p := range claudeProviders {
 			if p.Enabled && p.APIURL != "" && p.APIKey != "" {
 				claudeReady++
@@ -576,18 +578,24 @@ func (prs *ProviderRelayService) registerRoutes(router gin.IRouter) {
 				geminiReady++
 			}
 		}
+		for _, p := range picoClawProviders {
+			if p.Enabled && p.APIURL != "" && p.APIKey != "" {
+				picoClawReady++
+			}
+		}
 
-		ready := claudeReady > 0 || codexReady > 0 || geminiReady > 0
+		ready := claudeReady > 0 || codexReady > 0 || geminiReady > 0 || picoClawReady > 0
 		status := http.StatusOK
 		if !ready {
 			status = http.StatusServiceUnavailable
 		}
 
 		c.JSON(status, gin.H{
-			"ready":           ready,
-			"claude_providers": claudeReady,
-			"codex_providers":  codexReady,
-			"timestamp":       time.Now().Unix(),
+			"ready":              ready,
+			"claude_providers":   claudeReady,
+			"codex_providers":    codexReady,
+			"picoclaw_providers": picoClawReady,
+			"timestamp":          time.Now().Unix(),
 		})
 	})
 
@@ -607,7 +615,8 @@ ailurus_paas_uptime_seconds %.0f
 # TYPE ailurus_paas_providers_total gauge
 ailurus_paas_providers_total{platform="claude",status="enabled"} %d
 ailurus_paas_providers_total{platform="codex",status="enabled"} %d
-`, AppVersion, time.Since(prs.startTime).Seconds(), prs.countEnabledProviders("claude"), prs.countEnabledProviders("codex"))
+ailurus_paas_providers_total{platform="picoclaw",status="enabled"} %d
+`, AppVersion, time.Since(prs.startTime).Seconds(), prs.countEnabledProviders("claude"), prs.countEnabledProviders("codex"), prs.countEnabledProviders("picoclaw"))
 
 		c.Data(http.StatusOK, "text/plain; version=0.0.4; charset=utf-8", []byte(metrics))
 	})
@@ -620,25 +629,31 @@ ailurus_paas_providers_total{platform="codex",status="enabled"} %d
 		})
 	})
 	// LLM 代理路由
-	// 如果启用了计费，使用订阅验证中间件包装
-	if prs.billingIntegration != nil && prs.billingIntegration.IsEnabled() {
-		router.POST("/v1/messages", prs.billingIntegration.WrapWithAuthAndSubscription(prs.proxyHandler("claude", "/v1/messages")))
-		router.POST("/responses", prs.billingIntegration.WrapWithAuthAndSubscription(prs.proxyHandler("codex", "/responses")))
-		router.POST("/v1/chat/completions", prs.billingIntegration.WrapWithAuthAndSubscription(prs.proxyHandler("codex", "/v1/chat/completions")))
-		router.POST("/chat/completions", prs.billingIntegration.WrapWithAuthAndSubscription(prs.proxyHandler("codex", "/chat/completions")))
-		router.POST("/v1beta/models/*modelAction", prs.billingIntegration.WrapWithAuthAndSubscription(prs.geminiNativeHandler()))
+	// 如果启用了 Lurus-API 配额检查，使用配额验证中间件包装
+	if prs.lurusIntegration != nil && prs.lurusIntegration.IsEnabled() {
+		router.POST("/v1/messages", prs.lurusIntegration.WrapWithQuotaCheck(prs.proxyHandler("claude", "/v1/messages")))
+		router.POST("/responses", prs.lurusIntegration.WrapWithQuotaCheck(prs.proxyHandler("codex", "/responses")))
+		router.POST("/v1/chat/completions", prs.lurusIntegration.WrapWithQuotaCheck(prs.proxyHandler("codex", "/v1/chat/completions")))
+		router.POST("/chat/completions", prs.lurusIntegration.WrapWithQuotaCheck(prs.proxyHandler("codex", "/chat/completions")))
+		router.POST("/v1beta/models/*modelAction", prs.lurusIntegration.WrapWithQuotaCheck(prs.geminiNativeHandler()))
+		// PicoClaw routes (OpenAI-compatible via /pc/ prefix)
+		router.POST("/pc/v1/chat/completions", prs.lurusIntegration.WrapWithQuotaCheck(prs.proxyHandler("picoclaw", "/v1/chat/completions")))
+		router.POST("/pc/chat/completions", prs.lurusIntegration.WrapWithQuotaCheck(prs.proxyHandler("picoclaw", "/chat/completions")))
 	} else {
-		// 无计费模式：直接代理
+		// 无配额检查模式：直接代理
 		router.POST("/v1/messages", prs.proxyHandler("claude", "/v1/messages"))
 		router.POST("/responses", prs.proxyHandler("codex", "/responses"))
 		router.POST("/v1/chat/completions", prs.proxyHandler("codex", "/v1/chat/completions"))
 		router.POST("/chat/completions", prs.proxyHandler("codex", "/chat/completions"))
 		router.POST("/v1beta/models/*modelAction", prs.geminiNativeHandler())
+		// PicoClaw routes (OpenAI-compatible via /pc/ prefix)
+		router.POST("/pc/v1/chat/completions", prs.proxyHandler("picoclaw", "/v1/chat/completions"))
+		router.POST("/pc/chat/completions", prs.proxyHandler("picoclaw", "/chat/completions"))
 	}
 
-	// 注册计费相关 API 路由 (认证、订阅、支付)
-	if prs.billingIntegration != nil {
-		prs.billingIntegration.RegisterBillingRoutes(router)
+	// 注册 Lurus-API 相关路由 (认证、配额、订阅)
+	if prs.lurusIntegration != nil {
+		prs.lurusIntegration.RegisterLurusRoutes(router)
 	}
 }
 
@@ -752,7 +767,7 @@ func (prs *ProviderRelayService) proxyHandler(kind string, endpoint string) gin.
 		var startIdx int
 		if prs.IsRoundRobinEnabled() {
 			// Round-Robin 模式：使用计数器轮询
-			startIdx = int(atomic.AddUint64(&prs.rrCounter, 1) - 1) % len(active)
+			startIdx = int(atomic.AddUint64(&prs.rrCounter, 1)-1) % len(active)
 			fmt.Printf("[INFO] Round-Robin 模式：从第 %d 个 provider 开始（%s）\n", startIdx+1, active[startIdx].Name)
 		} else {
 			// 优先级模式：从第一个（优先级最高的）开始
@@ -1231,7 +1246,7 @@ func (prs *ProviderRelayService) forwardRequest(
 			// 捕获响应数据（限制 10MB）
 			if shouldLogBody {
 				if len(respData) <= 10*1024*1024 {
-					responseBuffer.Write(respData)  // 记录原始响应
+					responseBuffer.Write(respData) // 记录原始响应
 				} else {
 					responseBuffer.Write(respData[:10*1024*1024])
 				}
@@ -1574,37 +1589,37 @@ func parseEventPayload(payload string, parser func(string, *ReqeustLog), usage *
 }
 
 type ReqeustLog struct {
-	ID                  int64   `json:"id"`
-	TraceID             string  `json:"trace_id"`             // 全局追踪 ID (UUID)
-	RequestID           string  `json:"request_id"`           // 客户端请求 ID
-	Platform            string  `json:"platform"`             // claude code or codex
-	Model               string  `json:"model"`
-	Provider            string  `json:"provider"`             // provider name
-	HttpCode            int     `json:"http_code"`
-	InputTokens         int     `json:"input_tokens"`
-	OutputTokens        int     `json:"output_tokens"`
-	CacheCreateTokens   int     `json:"cache_create_tokens"`
-	CacheReadTokens     int     `json:"cache_read_tokens"`
-	ReasoningTokens     int     `json:"reasoning_tokens"`
-	IsStream            bool    `json:"is_stream"`
-	DurationSec         float64 `json:"duration_sec"`
-	UserAgent           string  `json:"user_agent"`           // 用户代理（识别 TUI/GUI 客户端）
-	ClientIP            string  `json:"client_ip"`            // 客户端 IP
-	UserID              string  `json:"user_id"`              // 用户标识（多租户）
-	RequestMethod       string  `json:"request_method"`       // HTTP 方法
-	RequestPath         string  `json:"request_path"`         // 请求路径
-	ErrorType           string  `json:"error_type"`           // 错误类型（network/auth/rate_limit/server/etc）
-	ErrorMessage        string  `json:"error_message"`        // 错误详细信息
-	ProviderErrorCode   string  `json:"provider_error_code"`  // 供应商错误码
-	CreatedAt           string  `json:"created_at"`
-	InputCost           float64 `json:"input_cost"`
-	OutputCost          float64 `json:"output_cost"`
-	CacheCreateCost     float64 `json:"cache_create_cost"`
-	CacheReadCost       float64 `json:"cache_read_cost"`
-	Ephemeral5mCost     float64 `json:"ephemeral_5m_cost"`
-	Ephemeral1hCost     float64 `json:"ephemeral_1h_cost"`
-	TotalCost           float64 `json:"total_cost"`
-	HasPricing          bool    `json:"has_pricing"`
+	ID                int64   `json:"id"`
+	TraceID           string  `json:"trace_id"`   // 全局追踪 ID (UUID)
+	RequestID         string  `json:"request_id"` // 客户端请求 ID
+	Platform          string  `json:"platform"`   // claude code or codex
+	Model             string  `json:"model"`
+	Provider          string  `json:"provider"` // provider name
+	HttpCode          int     `json:"http_code"`
+	InputTokens       int     `json:"input_tokens"`
+	OutputTokens      int     `json:"output_tokens"`
+	CacheCreateTokens int     `json:"cache_create_tokens"`
+	CacheReadTokens   int     `json:"cache_read_tokens"`
+	ReasoningTokens   int     `json:"reasoning_tokens"`
+	IsStream          bool    `json:"is_stream"`
+	DurationSec       float64 `json:"duration_sec"`
+	UserAgent         string  `json:"user_agent"`          // 用户代理（识别 TUI/GUI 客户端）
+	ClientIP          string  `json:"client_ip"`           // 客户端 IP
+	UserID            string  `json:"user_id"`             // 用户标识（多租户）
+	RequestMethod     string  `json:"request_method"`      // HTTP 方法
+	RequestPath       string  `json:"request_path"`        // 请求路径
+	ErrorType         string  `json:"error_type"`          // 错误类型（network/auth/rate_limit/server/etc）
+	ErrorMessage      string  `json:"error_message"`       // 错误详细信息
+	ProviderErrorCode string  `json:"provider_error_code"` // 供应商错误码
+	CreatedAt         string  `json:"created_at"`
+	InputCost         float64 `json:"input_cost"`
+	OutputCost        float64 `json:"output_cost"`
+	CacheCreateCost   float64 `json:"cache_create_cost"`
+	CacheReadCost     float64 `json:"cache_read_cost"`
+	Ephemeral5mCost   float64 `json:"ephemeral_5m_cost"`
+	Ephemeral1hCost   float64 `json:"ephemeral_1h_cost"`
+	TotalCost         float64 `json:"total_cost"`
+	HasPricing        bool    `json:"has_pricing"`
 }
 
 // RequestLogBody 请求/响应体存储结构（独立表，7天过期）
@@ -1961,8 +1976,8 @@ func (prs *ProviderRelayService) geminiNativeHandler() gin.HandlerFunc {
 			"gemini-cli",
 			provider,
 			targetPath,
-			map[string]string{"key": provider.APIKey},  // query
-			nil,  // clientHeaders
+			map[string]string{"key": provider.APIKey}, // query
+			nil, // clientHeaders
 			bodyBytes,
 			isStream,
 			mappedModel,
@@ -2707,4 +2722,484 @@ func (prs *ProviderRelayService) forwardGeminiToNewAPI(
 
 	fmt.Printf("[ERROR] Gemini->NewAPI error (trace_id=%s, status=%d): %s\n", traceID, status, string(respBody))
 	return false, fmt.Errorf("new-api status %d: %s", status, string(respBody))
+}
+
+// ============================================================
+// LLM Log Configuration and Query Functions
+// ============================================================
+
+// LLMLogConfig represents the configuration for LLM logging
+type LLMLogConfig struct {
+	Enabled         bool   `json:"enabled"`
+	StoragePath     string `json:"storage_path"`      // Custom storage path (default: ~/.code-switch)
+	SaveFullContent bool   `json:"save_full_content"` // Whether to save full request/response
+	RetentionDays   int    `json:"retention_days"`    // Retention period in days (0 = forever)
+	MaxFileSizeMB   int    `json:"max_file_size_mb"`  // Max file size in MB
+	AutoCleanup     bool   `json:"auto_cleanup"`      // Whether to auto cleanup old logs
+}
+
+// LogFilter represents filters for querying logs
+type LogFilter struct {
+	Platform  string  `json:"platform"`   // claude, codex, gemini-cli
+	Model     string  `json:"model"`      // Model name filter
+	Provider  string  `json:"provider"`   // Provider name filter
+	StartTime string  `json:"start_time"` // ISO 8601 format
+	EndTime   string  `json:"end_time"`   // ISO 8601 format
+	MinCost   float64 `json:"min_cost"`   // Minimum cost filter
+	MaxCost   float64 `json:"max_cost"`   // Maximum cost filter
+	HasError  *bool   `json:"has_error"`  // Filter by error status
+	Page      int     `json:"page"`       // Page number (1-based)
+	PageSize  int     `json:"page_size"`  // Items per page
+	SortBy    string  `json:"sort_by"`    // Sort field
+	SortOrder string  `json:"sort_order"` // asc or desc
+}
+
+// LogQueryResult represents the result of a log query
+type LogQueryResult struct {
+	Logs       []ReqeustLog `json:"logs"`
+	Total      int          `json:"total"`
+	Page       int          `json:"page"`
+	PageSize   int          `json:"page_size"`
+	TotalPages int          `json:"total_pages"`
+}
+
+// LogDetail represents detailed information about a single log entry
+type LogDetail struct {
+	Log          ReqeustLog `json:"log"`
+	RequestBody  string     `json:"request_body,omitempty"`
+	ResponseBody string     `json:"response_body,omitempty"`
+}
+
+// LogStatistics represents usage statistics
+type LogStatistics struct {
+	TotalRequests     int            `json:"total_requests"`
+	TotalTokens       int            `json:"total_tokens"`
+	TotalInputTokens  int            `json:"total_input_tokens"`
+	TotalOutputTokens int            `json:"total_output_tokens"`
+	TotalCost         float64        `json:"total_cost"`
+	SuccessRate       float64        `json:"success_rate"`
+	AvgDuration       float64        `json:"avg_duration_sec"`
+	ByPlatform        map[string]int `json:"by_platform"`
+	ByModel           map[string]int `json:"by_model"`
+	ByProvider        map[string]int `json:"by_provider"`
+	Period            string         `json:"period"` // today, week, month, all
+}
+
+// GetLLMLogConfig returns the current LLM log configuration
+func (prs *ProviderRelayService) GetLLMLogConfig() LLMLogConfig {
+	home, _ := os.UserHomeDir()
+	configPath := filepath.Join(home, ".code-switch", "llm-log-settings.json")
+
+	config := LLMLogConfig{
+		Enabled:         prs.IsBodyLogEnabled(),
+		StoragePath:     filepath.Join(home, ".code-switch"),
+		SaveFullContent: prs.IsBodyLogEnabled(),
+		RetentionDays:   7,
+		MaxFileSizeMB:   10,
+		AutoCleanup:     true,
+	}
+
+	// Try to load from file
+	data, err := os.ReadFile(configPath)
+	if err == nil {
+		_ = json.Unmarshal(data, &config)
+	}
+
+	return config
+}
+
+// SetLLMLogConfig sets the LLM log configuration
+func (prs *ProviderRelayService) SetLLMLogConfig(config LLMLogConfig) error {
+	home, _ := os.UserHomeDir()
+	configPath := filepath.Join(home, ".code-switch", "llm-log-settings.json")
+
+	// Update body log enabled status
+	prs.SetBodyLogEnabled(config.SaveFullContent)
+
+	// Save to file
+	data, err := json.MarshalIndent(config, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	// Ensure directory exists
+	dir := filepath.Dir(configPath)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return err
+	}
+
+	return os.WriteFile(configPath, data, 0644)
+}
+
+// QueryLogs queries LLM logs with filters
+func (prs *ProviderRelayService) QueryLogs(filter LogFilter) (*LogQueryResult, error) {
+	// Set defaults
+	if filter.Page < 1 {
+		filter.Page = 1
+	}
+	if filter.PageSize < 1 || filter.PageSize > 100 {
+		filter.PageSize = 20
+	}
+	if filter.SortBy == "" {
+		filter.SortBy = "created_at"
+	}
+	if filter.SortOrder == "" {
+		filter.SortOrder = "desc"
+	}
+
+	// Build query
+	where := "1=1"
+	args := make([]interface{}, 0)
+
+	if filter.Platform != "" {
+		where += " AND platform = ?"
+		args = append(args, filter.Platform)
+	}
+	if filter.Model != "" {
+		where += " AND model LIKE ?"
+		args = append(args, "%"+filter.Model+"%")
+	}
+	if filter.Provider != "" {
+		where += " AND provider = ?"
+		args = append(args, filter.Provider)
+	}
+	if filter.StartTime != "" {
+		where += " AND created_at >= ?"
+		args = append(args, filter.StartTime)
+	}
+	if filter.EndTime != "" {
+		where += " AND created_at <= ?"
+		args = append(args, filter.EndTime)
+	}
+	if filter.MinCost > 0 {
+		where += " AND total_cost >= ?"
+		args = append(args, filter.MinCost)
+	}
+	if filter.MaxCost > 0 {
+		where += " AND total_cost <= ?"
+		args = append(args, filter.MaxCost)
+	}
+	if filter.HasError != nil {
+		if *filter.HasError {
+			where += " AND http_code >= 400"
+		} else {
+			where += " AND http_code < 400"
+		}
+	}
+
+	// Count total
+	db, err := xdb.DB("default")
+	if err != nil {
+		return nil, err
+	}
+
+	var total int
+	countSQL := "SELECT COUNT(*) FROM request_log WHERE " + where
+	if err := db.QueryRow(countSQL, args...).Scan(&total); err != nil {
+		return nil, err
+	}
+
+	// Query with pagination
+	offset := (filter.Page - 1) * filter.PageSize
+	orderBy := filter.SortBy
+	if filter.SortOrder == "desc" {
+		orderBy += " DESC"
+	} else {
+		orderBy += " ASC"
+	}
+
+	querySQL := fmt.Sprintf(`
+		SELECT id, trace_id, request_id, platform, model, provider, http_code,
+		       input_tokens, output_tokens, cache_create_tokens, cache_read_tokens,
+		       reasoning_tokens, is_stream, duration_sec, user_agent, client_ip,
+		       user_id, request_method, request_path, error_type, error_message,
+		       provider_error_code, input_cost, output_cost, cache_create_cost,
+		       cache_read_cost, ephemeral_5m_cost, ephemeral_1h_cost, total_cost,
+		       created_at
+		FROM request_log
+		WHERE %s
+		ORDER BY %s
+		LIMIT ? OFFSET ?
+	`, where, orderBy)
+
+	args = append(args, filter.PageSize, offset)
+	rows, err := db.Query(querySQL, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	logs := make([]ReqeustLog, 0)
+	for rows.Next() {
+		var log ReqeustLog
+		var isStream int
+		if err := rows.Scan(
+			&log.ID, &log.TraceID, &log.RequestID, &log.Platform, &log.Model, &log.Provider,
+			&log.HttpCode, &log.InputTokens, &log.OutputTokens, &log.CacheCreateTokens,
+			&log.CacheReadTokens, &log.ReasoningTokens, &isStream, &log.DurationSec,
+			&log.UserAgent, &log.ClientIP, &log.UserID, &log.RequestMethod, &log.RequestPath,
+			&log.ErrorType, &log.ErrorMessage, &log.ProviderErrorCode, &log.InputCost,
+			&log.OutputCost, &log.CacheCreateCost, &log.CacheReadCost, &log.Ephemeral5mCost,
+			&log.Ephemeral1hCost, &log.TotalCost, &log.CreatedAt,
+		); err != nil {
+			continue
+		}
+		log.IsStream = isStream == 1
+		logs = append(logs, log)
+	}
+
+	totalPages := (total + filter.PageSize - 1) / filter.PageSize
+
+	return &LogQueryResult{
+		Logs:       logs,
+		Total:      total,
+		Page:       filter.Page,
+		PageSize:   filter.PageSize,
+		TotalPages: totalPages,
+	}, nil
+}
+
+// GetLogDetail returns detailed information about a single log entry
+func (prs *ProviderRelayService) GetLogDetail(traceID string) (*LogDetail, error) {
+	db, err := xdb.DB("default")
+	if err != nil {
+		return nil, err
+	}
+
+	// Query main log
+	querySQL := `
+		SELECT id, trace_id, request_id, platform, model, provider, http_code,
+		       input_tokens, output_tokens, cache_create_tokens, cache_read_tokens,
+		       reasoning_tokens, is_stream, duration_sec, user_agent, client_ip,
+		       user_id, request_method, request_path, error_type, error_message,
+		       provider_error_code, input_cost, output_cost, cache_create_cost,
+		       cache_read_cost, ephemeral_5m_cost, ephemeral_1h_cost, total_cost,
+		       created_at
+		FROM request_log
+		WHERE trace_id = ?
+		LIMIT 1
+	`
+
+	var log ReqeustLog
+	var isStream int
+	if err := db.QueryRow(querySQL, traceID).Scan(
+		&log.ID, &log.TraceID, &log.RequestID, &log.Platform, &log.Model, &log.Provider,
+		&log.HttpCode, &log.InputTokens, &log.OutputTokens, &log.CacheCreateTokens,
+		&log.CacheReadTokens, &log.ReasoningTokens, &isStream, &log.DurationSec,
+		&log.UserAgent, &log.ClientIP, &log.UserID, &log.RequestMethod, &log.RequestPath,
+		&log.ErrorType, &log.ErrorMessage, &log.ProviderErrorCode, &log.InputCost,
+		&log.OutputCost, &log.CacheCreateCost, &log.CacheReadCost, &log.Ephemeral5mCost,
+		&log.Ephemeral1hCost, &log.TotalCost, &log.CreatedAt,
+	); err != nil {
+		return nil, err
+	}
+	log.IsStream = isStream == 1
+
+	detail := &LogDetail{Log: log}
+
+	// Query body if available
+	bodySQL := "SELECT request_body, response_body FROM request_log_body WHERE trace_id = ? LIMIT 1"
+	var reqBody, respBody sql.NullString
+	if err := db.QueryRow(bodySQL, traceID).Scan(&reqBody, &respBody); err == nil {
+		if reqBody.Valid {
+			detail.RequestBody = reqBody.String
+		}
+		if respBody.Valid {
+			detail.ResponseBody = respBody.String
+		}
+	}
+
+	return detail, nil
+}
+
+// GetLogStatistics returns usage statistics
+func (prs *ProviderRelayService) GetLogStatistics(period string) (*LogStatistics, error) {
+	db, err := xdb.DB("default")
+	if err != nil {
+		return nil, err
+	}
+
+	// Determine time range
+	var timeFilter string
+	switch period {
+	case "today":
+		timeFilter = "AND date(created_at) = date('now')"
+	case "week":
+		timeFilter = "AND created_at >= datetime('now', '-7 days')"
+	case "month":
+		timeFilter = "AND created_at >= datetime('now', '-30 days')"
+	default:
+		timeFilter = ""
+		period = "all"
+	}
+
+	stats := &LogStatistics{
+		Period:     period,
+		ByPlatform: make(map[string]int),
+		ByModel:    make(map[string]int),
+		ByProvider: make(map[string]int),
+	}
+
+	// Aggregate statistics
+	aggSQL := fmt.Sprintf(`
+		SELECT
+			COUNT(*) as total_requests,
+			COALESCE(SUM(input_tokens + output_tokens), 0) as total_tokens,
+			COALESCE(SUM(input_tokens), 0) as total_input_tokens,
+			COALESCE(SUM(output_tokens), 0) as total_output_tokens,
+			COALESCE(SUM(total_cost), 0) as total_cost,
+			COALESCE(AVG(duration_sec), 0) as avg_duration,
+			COALESCE(SUM(CASE WHEN http_code < 400 THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(*), 0), 0) as success_rate
+		FROM request_log
+		WHERE 1=1 %s
+	`, timeFilter)
+
+	if err := db.QueryRow(aggSQL).Scan(
+		&stats.TotalRequests, &stats.TotalTokens, &stats.TotalInputTokens,
+		&stats.TotalOutputTokens, &stats.TotalCost, &stats.AvgDuration, &stats.SuccessRate,
+	); err != nil {
+		return nil, err
+	}
+
+	// Group by platform
+	platformSQL := fmt.Sprintf("SELECT platform, COUNT(*) FROM request_log WHERE 1=1 %s GROUP BY platform", timeFilter)
+	platformRows, err := db.Query(platformSQL)
+	if err == nil {
+		defer platformRows.Close()
+		for platformRows.Next() {
+			var platform string
+			var count int
+			if platformRows.Scan(&platform, &count) == nil {
+				stats.ByPlatform[platform] = count
+			}
+		}
+	}
+
+	// Group by model (top 10)
+	modelSQL := fmt.Sprintf("SELECT model, COUNT(*) as cnt FROM request_log WHERE 1=1 %s GROUP BY model ORDER BY cnt DESC LIMIT 10", timeFilter)
+	modelRows, err := db.Query(modelSQL)
+	if err == nil {
+		defer modelRows.Close()
+		for modelRows.Next() {
+			var model string
+			var count int
+			if modelRows.Scan(&model, &count) == nil {
+				stats.ByModel[model] = count
+			}
+		}
+	}
+
+	// Group by provider
+	providerSQL := fmt.Sprintf("SELECT provider, COUNT(*) FROM request_log WHERE 1=1 %s GROUP BY provider", timeFilter)
+	providerRows, err := db.Query(providerSQL)
+	if err == nil {
+		defer providerRows.Close()
+		for providerRows.Next() {
+			var provider string
+			var count int
+			if providerRows.Scan(&provider, &count) == nil {
+				stats.ByProvider[provider] = count
+			}
+		}
+	}
+
+	return stats, nil
+}
+
+// ExportLogs exports logs to a file
+func (prs *ProviderRelayService) ExportLogs(filter LogFilter, format string) (string, error) {
+	// Query all matching logs (ignore pagination for export)
+	filter.Page = 1
+	filter.PageSize = 10000 // Max export limit
+
+	result, err := prs.QueryLogs(filter)
+	if err != nil {
+		return "", err
+	}
+
+	// Determine export path
+	home, _ := os.UserHomeDir()
+	exportDir := filepath.Join(home, ".code-switch", "exports")
+	if err := os.MkdirAll(exportDir, 0755); err != nil {
+		return "", err
+	}
+
+	timestamp := time.Now().Format("20060102_150405")
+	var exportPath string
+	var data []byte
+
+	switch format {
+	case "csv":
+		exportPath = filepath.Join(exportDir, fmt.Sprintf("llm_logs_%s.csv", timestamp))
+		data = prs.logsToCSV(result.Logs)
+	default: // json
+		exportPath = filepath.Join(exportDir, fmt.Sprintf("llm_logs_%s.json", timestamp))
+		data, err = json.MarshalIndent(result.Logs, "", "  ")
+		if err != nil {
+			return "", err
+		}
+	}
+
+	if err := os.WriteFile(exportPath, data, 0644); err != nil {
+		return "", err
+	}
+
+	return exportPath, nil
+}
+
+// logsToCSV converts logs to CSV format
+func (prs *ProviderRelayService) logsToCSV(logs []ReqeustLog) []byte {
+	var buf bytes.Buffer
+
+	// Header
+	buf.WriteString("ID,TraceID,Platform,Model,Provider,HttpCode,InputTokens,OutputTokens,TotalCost,DurationSec,CreatedAt,ErrorType\n")
+
+	// Data rows
+	for _, log := range logs {
+		buf.WriteString(fmt.Sprintf("%d,%s,%s,%s,%s,%d,%d,%d,%.6f,%.3f,%s,%s\n",
+			log.ID, log.TraceID, log.Platform, log.Model, log.Provider,
+			log.HttpCode, log.InputTokens, log.OutputTokens, log.TotalCost,
+			log.DurationSec, log.CreatedAt, log.ErrorType,
+		))
+	}
+
+	return buf.Bytes()
+}
+
+// CleanupOldLogs removes logs older than the specified retention period
+func (prs *ProviderRelayService) CleanupOldLogs(retentionDays int) (int, error) {
+	if retentionDays <= 0 {
+		return 0, nil
+	}
+
+	db, err := xdb.DB("default")
+	if err != nil {
+		return 0, err
+	}
+
+	// Delete from request_log_body first (foreign key consideration)
+	bodySQL := fmt.Sprintf("DELETE FROM request_log_body WHERE created_at < datetime('now', '-%d days')", retentionDays)
+	bodyResult, err := db.Exec(bodySQL)
+	if err != nil {
+		fmt.Printf("[LLM Log] Failed to cleanup body logs: %v\n", err)
+	} else {
+		bodyDeleted, _ := bodyResult.RowsAffected()
+		if bodyDeleted > 0 {
+			fmt.Printf("[LLM Log] Cleaned up %d body log entries\n", bodyDeleted)
+		}
+	}
+
+	// Delete from request_log
+	logSQL := fmt.Sprintf("DELETE FROM request_log WHERE created_at < datetime('now', '-%d days')", retentionDays)
+	logResult, err := db.Exec(logSQL)
+	if err != nil {
+		return 0, err
+	}
+
+	deleted, _ := logResult.RowsAffected()
+	if deleted > 0 {
+		fmt.Printf("[LLM Log] Cleaned up %d log entries older than %d days\n", deleted, retentionDays)
+	}
+
+	return int(deleted), nil
 }

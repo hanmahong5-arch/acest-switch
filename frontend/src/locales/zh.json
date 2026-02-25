@@ -1102,6 +1102,9 @@
       },
       "gemini": {
         "description": "Google Gemini CLI 代理控制"
+      },
+      "picoclaw": {
+        "description": "PicoClaw AI CLI 代理控制"
       }
     }
   }

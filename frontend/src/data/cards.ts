@@ -16,7 +16,7 @@ export type AutomationCard = {
   level?: number
 }
 
-export const automationCardGroups: Record<'claude' | 'codex' | 'gemini-cli', AutomationCard[]> = {
+export const automationCardGroups: Record<'claude' | 'codex' | 'gemini-cli' | 'picoclaw', AutomationCard[]> = {
   claude: [
     {
       id: 99,
@@ -113,6 +113,30 @@ export const automationCardGroups: Record<'claude' | 'codex' | 'gemini-cli', Aut
         'gemini-3-flash-preview': true,
       },
       level: 1,
+    },
+  ],
+  picoclaw: [
+    {
+      id: 401,
+      name: 'OpenAI',
+      apiUrl: 'https://api.openai.com',
+      apiKey: '',
+      officialSite: 'https://platform.openai.com',
+      icon: 'openai',
+      tint: 'rgba(16, 163, 127, 0.14)',
+      accent: '#10a37f',
+      enabled: false,
+    },
+    {
+      id: 402,
+      name: 'OpenRouter',
+      apiUrl: 'https://openrouter.ai/api',
+      apiKey: '',
+      officialSite: 'https://openrouter.ai',
+      icon: 'openrouter',
+      tint: 'rgba(139, 92, 246, 0.14)',
+      accent: '#8b5cf6',
+      enabled: false,
     },
   ],
 }

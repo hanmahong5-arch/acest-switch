@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/daodao97/xgo/xdb"
 	"github.com/daodao97/xgo/xlog"
 )
 
@@ -97,9 +98,19 @@ func MigrateGeminiProvider() error {
 	return nil
 }
 
+// MigratePicoClawProxyControl seeds picoclaw into proxy_control for existing installations
+func MigratePicoClawProxyControl() {
+	db, err := xdb.DB("default")
+	if err != nil {
+		return
+	}
+	db.Exec(`INSERT OR IGNORE INTO proxy_control (app_name, proxy_enabled) VALUES ('picoclaw', 1)`)
+}
+
 // 在 ProviderRelayService 启动时调用此函数
 func (prs *ProviderRelayService) RunMigrations() {
 	if err := MigrateGeminiProvider(); err != nil {
 		xlog.Error("[Migration] 迁移失败: %v", err)
 	}
+	MigratePicoClawProxyControl()
 }

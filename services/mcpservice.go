@@ -26,6 +26,7 @@ const (
 	platClaudeCode    = "claude-code"
 	platCodex         = "codex"
 	platGeminiCLI     = "gemini-cli"
+	platPicoClaw      = "picoclaw"
 )
 
 var builtInServers = map[string]rawMCPServer{
@@ -66,6 +67,7 @@ type MCPServer struct {
 	EnabledInClaude     bool              `json:"enabled_in_claude"`
 	EnabledInCodex      bool              `json:"enabled_in_codex"`
 	EnabledInGemini     bool              `json:"enabled_in_gemini"`
+	EnabledInPicoClaw   bool              `json:"enabled_in_picoclaw"`
 	MissingPlaceholders []string          `json:"missing_placeholders"`
 }
 
@@ -380,6 +382,8 @@ func normalizePlatform(value string) (string, bool) {
 		return "codex", true
 	case "gemini", "gemini_cli", "gemini-cli":
 		return "gemini-cli", true
+	case "picoclaw", "pico-claw", "pico_claw", "pico":
+		return "picoclaw", true
 	default:
 		return "", false
 	}

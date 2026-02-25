@@ -353,6 +353,8 @@ func normalizeAppName(name string) string {
 		return "codex"
 	case "gemini", "gemini-cli", "gemini_cli":
 		return "gemini"
+	case "picoclaw", "pico-claw", "pico_claw", "pico":
+		return "picoclaw"
 	default:
 		return name
 	}

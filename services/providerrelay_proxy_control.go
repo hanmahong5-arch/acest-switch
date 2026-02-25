@@ -38,6 +38,11 @@ func (prs *ProviderRelayService) ProxyControlMiddleware(proxyController *ProxyCo
 func detectAppFromPath(path string) string {
 	path = strings.ToLower(path)
 
+	// PicoClaw routes (must check before generic OpenAI routes)
+	if strings.HasPrefix(path, "/pc/") {
+		return "picoclaw"
+	}
+
 	// Claude Code routes
 	if strings.Contains(path, "/v1/messages") {
 		return "claude"
